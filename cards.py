@@ -1,6 +1,6 @@
 """Card model and controller"""
 
-from datetime import datetime, timezone
+from datetime import datetime
 from database import db
 
 class Card(db.Model): # pylint: disable=too-few-public-methods
@@ -24,7 +24,7 @@ class Card(db.Model): # pylint: disable=too-few-public-methods
             'text': self.text,
             'column': self.column,
             'color': self.color,
-            'modified': self.modified.replace(tzinfo=timezone.utc).isoformat(),
+            'modified': self.modified.isoformat(),
             'archived': self.archived,
         }
 
