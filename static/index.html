@@ -38,7 +38,7 @@
       margin: 0.2em;
       padding: 3px;
       margin: 1em 0.5em;
-      min-height: 300px;
+      min-height: 500px;
     }
     #kanban header form {
       position: absolute;
@@ -71,11 +71,12 @@
       text-align: center;
       margin: 0.5em;
       display: block;
-      background-color: var(--default-card-color);
+	  background-image: linear-gradient(to right, rgba(255,0,0,0), var(--default-card-color));
+      /*background-color: var(--default-card-color);*/
       border-radius: 5px;
       padding 1em;
       display: block;
-      border: 1px solid black;
+      border: 3px solid black;
     }
 
     li.kanban-card.archived {
@@ -169,7 +170,7 @@
       left: calc(50% - 200px - 1.2em);
       padding: 1.2em;
       border-radius: 1em;
-      border: solid 1px black;
+      border: solid 5px black;
     }
 
     section.drop-target ol {
