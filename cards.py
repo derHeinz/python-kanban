@@ -3,15 +3,41 @@
 from datetime import datetime
 from database import db
 
+
+masks = [1,2,4,8,16,32,64,128,256,512]
+
+class Tag(object):
+    id= 0
+	
+    def json(self):
+        return {
+            'id': self.id,
+        }
+
+def calc_tags(number):
+    ret = []
+    for m in masks:
+        val = True
+        if (number & m) == 0:
+            val = False
+        if val:
+            t = Tag()
+            t.id = m
+            ret.append(t)
+    return ret
+	
 class Card(db.Model): # pylint: disable=too-few-public-methods
     """SQLAlchemy card class"""
     id = db.Column(db.Integer, primary_key=True) # pylint: disable=C0103
     text = db.Column(db.String(120))
+    additional_text = db.Column(db.String(1000))
     column = db.Column(db.String(120), default="To Do")
     color = db.Column(db.String(7), default='#dddddd')
     modified = db.Column(db.DateTime, default=datetime.utcnow)
     archived = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
+    tags = db.Column(db.Integer, default=0)
+    due_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         """Return a string representation of a card"""
@@ -22,10 +48,13 @@ class Card(db.Model): # pylint: disable=too-few-public-methods
         return {
             'id': self.id,
             'text': self.text,
+            'tags': [tag.json() for tag in calc_tags(self.tags)],
+            'additional_text': self.additional_text,
             'column': self.column,
             'color': self.color,
             'modified': self.modified.isoformat(),
             'archived': self.archived,
+            'due_date': self.due_date.isoformat(),
         }
 
 def all_cards():
