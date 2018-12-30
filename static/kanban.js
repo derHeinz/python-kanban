@@ -30,6 +30,18 @@ window.app = new Vue({
         this.edit_card.text = this.$refs.card_edit_text.value;
         this.edit_card.color = this.$refs.card_edit_color.value;
         this.edit_card.archived = this.$refs.card_edit_archive.checked;
+
+		tags = []
+		for (i=0; i<this.$refs.card_edit_tag.length; i++) {
+		  comp = this.$refs.card_edit_tag[i];
+		  if (comp.checked) {
+		    extracted_id = comp.id.substring("card_edit_tag".length);
+		    tags.push({"id": parseInt(extracted_id)});
+		  }
+
+		}
+		this.edit_card.tags = tags;
+		
         this.update_card(card_id);
         this.edit_card = null;
       }
@@ -223,6 +235,16 @@ function tag_color(tagid) {
 	}
   }
   return "black"
+}
+
+function tag_checked(tagid, edit_card) {
+  for (i=0; i<edit_card.tags.length; i++) {
+    tag = edit_card.tags[i];
+	if (tag.id === tagid) {
+	  return true;
+	 }
+  }
+  return false
 }
 
 document.addEventListener("DOMContentLoaded", function () {

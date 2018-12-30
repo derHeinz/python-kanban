@@ -125,8 +125,16 @@ def update_card(card_id, json, columns):
     if 'archived' in json:
         modified = True
         card.archived = json['archived']
-
+		
+    if 'tags' in json:
+        modified = True
+        tags_int = 0
+        for tag in json['tags']:
+            val = tag.get('id')
+            tags_int += int(val)
+        card.tags = tags_int
+		
     if modified:
         card.modified = datetime.utcnow()
-
+		
     db.session.commit()
