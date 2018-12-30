@@ -11,6 +11,8 @@
 
 window.app = new Vue({
   data: {
+    tagids: [1, 2, 4, 8, 16, 32, 64, 128, 256, 512],
+    tagid_colors: ["red", "green", "yellow", "aqua", "brown", "#DC143C", "#7FFF00", "#A9A9A9", "#8B008B", "#ADFF2F"],
     cards: [],
     columns: [],
     edit_card: null,
@@ -211,6 +213,16 @@ function drop_handler (ev) {
     card.column = new_col;
     window.app.update_card(card.id);
   }
+}
+
+
+function tag_color(tagid) {
+  for (i=0; i<window.app.tagids.length; i++) {
+    if (tagid === window.app.tagids[i]) {
+	  return window.app.tagid_colors[i]
+	}
+  }
+  return "black"
 }
 
 document.addEventListener("DOMContentLoaded", function () {

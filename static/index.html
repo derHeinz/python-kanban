@@ -6,6 +6,7 @@
   <style>
     :root {
       --kanban-columns: 3;
+	  --tag-columns: 5;
       --default-card-color: #a2f7a8;
       --light-background: #eaeaeb;
     }
@@ -64,6 +65,12 @@
       display: grid;
       grid-template-columns: repeat(var(--kanban-columns), 1fr);
       grid-gap: 10px;
+    }
+	#tag-cols {
+      min-width: 8;
+      display: grid;
+      grid-template-columns: repeat(var(--tag-columns), 1fr);
+      grid-gap: 10px;
       margin: 1em;
     }
     li.kanban-card {
@@ -88,6 +95,20 @@
     li.kanban-card p.card-last-updated {
       text-align: center;
       margin: 0.5em;
+    }
+	li.kanban-card p.card-due {
+      text-align: center;
+      margin: 0.5em;
+      border: 2px solid black;
+      border-radius: 10px;
+    }
+	li.kanban-card p.card-tags {
+      text-align: center;
+	  padding: 4px;
+      margin: 0.5em;
+	  /*background: red;*/
+      /*border: 2px solid black;*/
+      border-radius: 10px;
     }
     li.kanban-card .card_id {
       position: absolute;
@@ -137,6 +158,24 @@
     #kanban-card-edit .color-label {
       float: left
     }
+    #kanban-card-edit .tag-checkbox {
+      left: 9px;
+      top: 5px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 3px 3px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+	#kanban-card-edit .tag-checkbox-container input {
+      position: absolute;
+      opacity: 0;
+	  cursor: pointer;
+      height: 0;
+      width: 0;
+    }
     #kanban-card-edit .archived-label {
       float: right
     }
@@ -171,6 +210,10 @@
       padding: 1.2em;
       border-radius: 1em;
       border: solid 5px black;
+    }
+	#kanban-card-edit .tags {
+      height: 6em;
+      margin: 0;
     }
 
     section.drop-target ol {
@@ -229,9 +272,14 @@
             <a draggable="false" class="edit-icon" href='#' v-on:click.prevent="start_card_edit(card.id, $event)" title="edit">
               <img src="static/edit_icon.svg" alt="edit" />
             </a>
+			<div id="tag-cols">
+				<p class="card-tags" v-for="tag in card.tags" v-bind:style="{'background-color': tag_color(tag.id)}" v-if="card.tags != 0" />
+			</div>
             <span class="card_id" v-show="show_card_ids"><small>#{{ card.id }}</small></span>
             <p class="card-text">{{ card.text }}</p>
             <p class="card-last-updated"><small v-show="show_card_timestamps"> Update {{ Math.floor((Date.now() - Date.parse(card.modified)) / (1000*60*60*24)) }} day(s) ago</small></p>
+			<p class="card-due"><small> Due {{ card.due_date }} </small></p>
+			
           </li>
         </transition-group>
       </section>
@@ -239,7 +287,10 @@
         <div id="card_edit">
           <form v-on:submit.prevent="complete_card_edit(edit_card.id, $event)" action="#" method="PUT">
             <label class="color-label">Background color: <input title="Select colour" ref="card_edit_color" type="color" v-bind:value="edit_card.color"/></label>
-            <label class="archived-label">Archived?: <input title="Archive card" ref="card_edit_archive" type="checkbox" v-bind:checked="edit_card.archived"/></label>
+            <div class="tag-checkbox-container">
+				<input class="tag-checkbox" nameref="radio-tag-button" type="checkbox" v-for="tag in edit_card.tags" v-bind:value="edit_card.tags" v-bind:style="{'background-color': tag_color(tag.id)}" />			
+			</div>
+			<label class="archived-label">Archived?: <input title="Archive card" ref="card_edit_archive" type="checkbox" v-bind:checked="edit_card.archived"/></label>
             <br />
             <textarea v-on:keyup.ctrl.Enter="complete_card_edit(edit_card.id, $event)" ref="card_edit_text">{{edit_card.text}}</textarea>
             <input class="save-card" type="submit" value="save" />
