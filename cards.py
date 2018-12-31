@@ -37,7 +37,7 @@ class Card(db.Model): # pylint: disable=too-few-public-methods
     archived = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
     tags = db.Column(db.Integer, default=0)
-    due_date = db.Column(db.DateTime, default=datetime.utcnow)
+    due_date = db.Column(db.Date, default=None)
 
     def __repr__(self):
         """Return a string representation of a card"""
@@ -54,7 +54,7 @@ class Card(db.Model): # pylint: disable=too-few-public-methods
             'color': self.color,
             'modified': self.modified.isoformat(),
             'archived': self.archived,
-            'due_date': self.due_date.isoformat(),
+            'due_date': (self.due_date.isoformat() if self.due_date is not None else None),
         }
 
 def all_cards():
@@ -133,6 +133,14 @@ def update_card(card_id, json, columns):
             val = tag.get('id')
             tags_int += int(val)
         card.tags = tags_int
+        
+    if 'due_date' in json:
+        dd = json['due_date']
+        if (dd is not None and dd != ""):
+            modified = True
+            card.due_date = datetime.strptime(dd, "%Y-%m-%d")
+        else:
+            card.due_date = None
 		
     if modified:
         card.modified = datetime.utcnow()

@@ -30,6 +30,7 @@ window.app = new Vue({
         this.edit_card.text = this.$refs.card_edit_text.value;
         this.edit_card.color = this.$refs.card_edit_color.value;
         this.edit_card.archived = this.$refs.card_edit_archive.checked;
+        this.edit_card.due_date = this.$refs.card_edit_due.value;
 
 		tags = []
 		for (i=0; i<this.$refs.card_edit_tag.length; i++) {
@@ -245,6 +246,40 @@ function tag_checked(tagid, edit_card) {
 	 }
   }
   return false
+}
+
+function date_due(date, day_diff) {
+    let now = new Date();
+    /*now.setHours(0,0,0,0);*/
+    
+    let due = new Date(date.getTime());
+    due.setDate(due.getDate() - day_diff);
+    
+    return (due > now)
+}
+
+function due_date_color(due_date) {
+    /* due date is just a string */
+    let due = new Date(due_date);
+    
+    if (date_due(due, 3)) {
+        return "white";
+    } else if (date_due(due, 2)) {
+        return "green";
+    } else if (date_due(due, 1)) {
+        return "yellow";
+    } else if (date_due(due, 0)) {
+        return "orange";
+    } else {
+        return "red";
+    }
+}
+
+function check_due_date(due_date) {
+    if (due_date === null) {
+        return false;
+    }
+    return due_date.includes("-");
 }
 
 document.addEventListener("DOMContentLoaded", function () {
