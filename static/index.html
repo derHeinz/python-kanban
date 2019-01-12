@@ -8,7 +8,6 @@
     :root {
       --kanban-columns: 3;
 	  --tag-columns: 8;
-      --default-card-color: #a2f7a8;
       --light-background: #eaeaeb;
     }
     body {
@@ -79,8 +78,9 @@
       text-align: center;
       margin: 0.5em;
       display: block;
-	  background-image: linear-gradient(to right, rgba(255,0,0,0), var(--default-card-color));
+	  /*background-image: linear-gradient(to right, rgba(255,0,0,0), var(--default-card-color));*/
       /*background-color: var(--default-card-color);*/
+      background-color: white;
       border-radius: 5px;
       padding 1em;
       display: block;
@@ -164,7 +164,6 @@
       <form v-on:submit.prevent="create_card" action="card" method="POST">
         <input title="create card" src="static/plus_icon.svg" type="image" value="Create card" />
         <label>text: <input name="text" type="text" required="required" /></label>
-        <label>colour: <input ref="new_card_color" title="Select colour" name="color" type="color" /></label>
       </form>
     </header>
     <!-- Three columns for the Kanban board -->
@@ -192,6 +191,7 @@
 			</div>
             <span class="card_id" v-show="show_card_ids"><small>#{{ card.id }}</small></span>
             <p class="card-text">{{ card.text }}</p>
+            <p class=""><img ref="card_image" v-if="card.image_fs_name !== null" v-bind:src="'images/' + card.image_fs_name" v-bind:alt="card.image_name" style="width:250px;height:150px;" /></p>
             <p class="card-last-updated"><small v-show="show_card_timestamps"> Update {{ Math.floor((Date.now() - Date.parse(card.modified)) / (1000*60*60*24)) }} day(s) ago</small></p>
 			<p class="card-due" v-bind:style="{'background-color': due_date_color(card.due_date)}" v-if="check_due_date(card.due_date)" ><small> &#128344; {{ card.due_date }} </small></p>
 			
@@ -206,8 +206,12 @@
               <tr>
                 <td>
                   <div>
-                    <label class="color-label">Background color: <input title="Select colour" ref="card_edit_color" type="color" v-bind:value="edit_card.color"/></label>
                     <label class="due-label">Due:  <input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
+                      <div>
+                        <label>File
+                            <input type="file" id="file" ref="file" v-on:change="handleFileUpload()"/>
+                        </label>
+                      </div>
                   </div>
                  </td>
                  <td>
@@ -244,7 +248,7 @@
     <hr>
     <small>
       The source code for this site is available on <a
-        href="https://github.com/FloatingOctothorpe/python-kanban">GitHub</a>.
+        href="https://github.com/derHeinz/python-kanban">GitHub</a>.
     </small>
   </footer>
   <script src="static/vue.min.js"></script>

@@ -18,7 +18,8 @@ window.app = new Vue({
     edit_card: null,
     show_archived_cards: false,
     show_card_ids: false,
-    show_card_timestamps: false
+    show_card_timestamps: false,
+    file: null
   },
   el: "#kanban",
   methods: {
@@ -27,11 +28,13 @@ window.app = new Vue({
     },
     complete_card_edit: function (card_id) {
       if (this.edit_card) {
+        this.update_card(card_id);
+        
+        /* refresh the current data */
         this.edit_card.text = this.$refs.card_edit_text.value;
-        this.edit_card.color = this.$refs.card_edit_color.value;
         this.edit_card.archived = this.$refs.card_edit_archive.checked;
         this.edit_card.due_date = this.$refs.card_edit_due.value;
-
+        
 		tags = []
 		for (i=0; i<this.$refs.card_edit_tag.length; i++) {
 		  comp = this.$refs.card_edit_tag[i];
@@ -42,20 +45,17 @@ window.app = new Vue({
 
 		}
 		this.edit_card.tags = tags;
-		
-        this.update_card(card_id);
+        
         this.edit_card = null;
       }
     },
     create_card: function (ev) {
       let vue_app = this;
       let form = ev.target;
-      let form_color = form.color.value;
 
       axios.post(form.action, new FormData(form)).then(function () {
         vue_app.refresh_cards();
         form.reset();
-        vue_app.$refs.new_card_color.value = form_color;
       });
     },
     delete_card: function (card_id) {
@@ -122,17 +122,27 @@ window.app = new Vue({
       });
     },
     update_card: function (id) {
+      /* craft uuid name for the file*/
+      let file_updated = (window.app.file !== null);
+      if (file_updated) {
+          let filename = window.app.file.name;
+          let file_ext = filename.substring(filename.lastIndexOf('.')+1, filename.length) || filename;
+          let uuid = guid();
+          let new_file_name = uuid + '.' + file_ext;
+        
+          submitFile(id, window.app.file, new_file_name);
+          window.app.file = null;
+            
+          /* update current field*/
+          this.edit_card.image_name = filename;
+          this.edit_card.image_fs_name = new_file_name;
+      }
       let card = this.get_card(id);
       axios.put("card/" + card.id, card);
-    },
-    update_card_color: function (card_id, ev) {
-      this.get_card(card_id).color = ev.target.value;
-      this.update_card(card_id);
     },
     init: function () {
       this.refresh_columns();
       this.refresh_cards();
-      this.$refs.new_card_color.value = getComputedStyle(document.documentElement).getPropertyValue("--default-card-color").replace(/ /g, "");
     }
   }
 });
@@ -280,6 +290,43 @@ function check_due_date(due_date) {
         return false;
     }
     return due_date.includes("-");
+}
+
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
+/* https://serversideup.net/uploading-files-vuejs-axios/ */
+function handleFileUpload() {
+    console.log("added file");
+    window.app.file = window.app.$refs.file.files[0];
+    console.log(window.app.file);
+}
+
+function submitFile(cardid, file, new_file_name) {
+    let formData = new FormData();
+    formData.append('file', file);
+    formData.append('new_file_name', new_file_name);
+    axios.post('/upload-file/' + cardid, formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }
+    ).then(function(response){
+        console.log('upload succeeded - now updating card');
+        /* update the card*/ 
+        // window.app.$refs.card_image = 
+        window.app.$forceUpdate();
+    }).catch(function(exc){
+        console.log('FAILURE!!');
+        console.log(exc);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
