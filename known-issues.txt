@@ -1,0 +1,6 @@
+# always uses big size images.
+
+# image not shown on edit card.
+
+# 
+
