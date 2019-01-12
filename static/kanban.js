@@ -135,7 +135,7 @@ window.app = new Vue({
             
           /* update current field*/
           this.edit_card.image_name = filename;
-          this.edit_card.image_fs_name = new_file_name;
+          // do not update image_fs_name because it's updated asynchronously when upload succeeded.
       }
       let card = this.get_card(id);
       axios.put("card/" + card.id, card);
@@ -319,10 +319,8 @@ function submitFile(cardid, file, new_file_name) {
             }
         }
     ).then(function(response){
-        console.log('upload succeeded - now updating card');
-        /* update the card*/ 
-        // window.app.$refs.card_image = 
-        window.app.$forceUpdate();
+        let c = window.app.get_card(cardid);       
+        c.image_fs_name = new_file_name;
     }).catch(function(exc){
         console.log('FAILURE!!');
         console.log(exc);

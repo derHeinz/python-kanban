@@ -194,7 +194,6 @@
             <p class=""><img ref="card_image" v-if="card.image_fs_name !== null" v-bind:src="'images/' + card.image_fs_name" v-bind:alt="card.image_name" style="width:250px;height:150px;" /></p>
             <p class="card-last-updated"><small v-show="show_card_timestamps"> Update {{ Math.floor((Date.now() - Date.parse(card.modified)) / (1000*60*60*24)) }} day(s) ago</small></p>
 			<p class="card-due" v-bind:style="{'background-color': due_date_color(card.due_date)}" v-if="check_due_date(card.due_date)" ><small> &#128344; {{ card.due_date }} </small></p>
-			
           </li>
         </transition-group>
       </section>

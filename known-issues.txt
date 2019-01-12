@@ -1,6 +1,7 @@
 # always uses big size images.
+# static size of image regardless of height and width ratio
 
-# image not shown on edit card.
+# already stored image not shown on edit card.
 
-# 
+# card is not a vue component
 
