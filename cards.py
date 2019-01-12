@@ -8,7 +8,7 @@ masks = [1,2,4,8,16,32,64,128,256,512]
 
 class Tag(object):
     id= 0
-	
+
     def json(self):
         return {
             'id': self.id,
@@ -25,19 +25,20 @@ def calc_tags(number):
             t.id = m
             ret.append(t)
     return ret
-	
+
 class Card(db.Model): # pylint: disable=too-few-public-methods
     """SQLAlchemy card class"""
     id = db.Column(db.Integer, primary_key=True) # pylint: disable=C0103
     text = db.Column(db.String(120))
     additional_text = db.Column(db.String(1000))
     column = db.Column(db.String(120), default="To Do")
-    color = db.Column(db.String(7), default='#dddddd')
     modified = db.Column(db.DateTime, default=datetime.utcnow)
     archived = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
     tags = db.Column(db.Integer, default=0)
     due_date = db.Column(db.Date, default=None)
+    image_name = db.Column(db.String(100))
+    image_fs_name = db.Column(db.String(100))
 
     def __repr__(self):
         """Return a string representation of a card"""
@@ -51,10 +52,11 @@ class Card(db.Model): # pylint: disable=too-few-public-methods
             'tags': [tag.json() for tag in calc_tags(self.tags)],
             'additional_text': self.additional_text,
             'column': self.column,
-            'color': self.color,
             'modified': self.modified.isoformat(),
             'archived': self.archived,
             'due_date': (self.due_date.isoformat() if self.due_date is not None else None),
+            'image_name': self.image_name,
+            'image_fs_name': self.image_fs_name,
         }
 
 def all_cards():
@@ -100,6 +102,14 @@ def order_cards(data):
         card.sort_order = i #len(cards) - i
 
     db.session.commit()
+    
+def update_card_image(card_id, image_name, image_fs_name):
+    card = Card.query.get(card_id)
+    
+    card.image_name = image_name
+    card.image_fs_name = image_fs_name
+    
+    db.session.commit()
 
 def update_card(card_id, json, columns):
     """Update an existing card"""
@@ -111,10 +121,6 @@ def update_card(card_id, json, columns):
         modified = True
         card.text = json['text']
 
-    if 'color' in json:
-        modified = True
-        card.color = json['color']
-
     if 'column' in json:
         if json['column'] in columns:
             modified = True
@@ -125,7 +131,7 @@ def update_card(card_id, json, columns):
     if 'archived' in json:
         modified = True
         card.archived = json['archived']
-		
+
     if 'tags' in json:
         modified = True
         tags_int = 0
@@ -133,7 +139,7 @@ def update_card(card_id, json, columns):
             val = tag.get('id')
             tags_int += int(val)
         card.tags = tags_int
-        
+
     if 'due_date' in json:
         dd = json['due_date']
         if (dd is not None and dd != ""):
@@ -141,8 +147,8 @@ def update_card(card_id, json, columns):
             card.due_date = datetime.strptime(dd, "%Y-%m-%d")
         else:
             card.due_date = None
-		
+
     if modified:
         card.modified = datetime.utcnow()
-		
+
     db.session.commit()
