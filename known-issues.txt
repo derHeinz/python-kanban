@@ -5,3 +5,9 @@
 
 # card is not a vue component
 
+# masks duplicated in python and js
+
+# image size is duplicated in python and js
+
+# image directory is duplicated in python and js
+
