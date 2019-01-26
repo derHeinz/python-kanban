@@ -1,35 +1,20 @@
 import json
 
-masks = [1,2,4,8,16,32,64,128,256,512]
-
-class Tag(object):
-	id= 0
-	
-	def json(self):
-		return {
-            'id': self.id,
-        }
+from PIL import Image, ImageFilter
 
 
-def calc_tags(number):
-	ret = []
-	for m in masks:
-		val = True
-		if (number & m) == 0:
-			val = False
-		if val:
-			t = Tag()
-			t.id = m
-			ret.append(t)
-	return ret
-	
-#zahl = 1
-#print(zahl & masks[0])
-#print(zahl & masks[1])
+size = 250, 150
+def createThumbnail(filepath):
+    try:
+        im = Image.open(filepath)
+        im.thumbnail(size)
+        outfile = filepath + ".thumbnail"
+        im.save(outfile, "JPEG")
+        return im
+    except IOError:
+        print "cannot create thumbnail"
 
-tags = calc_tags(189)
-print(len(tags))
 
-val = [tag.json() for tag in tags]
-
-print(json.dumps(val))
+filepath = 'images/00f53bc8-8f0a-8ca0-11e3-e0ff8c690a69.JPG'
+new_img = createThumbnail(filepath)
+new_img.show()

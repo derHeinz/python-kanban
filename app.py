@@ -7,10 +7,22 @@ import os
 import uuid
 from flask import Flask, send_from_directory, request, abort, make_response
 from flask.json import jsonify
+from PIL import Image
 from werkzeug.serving import make_server
 from werkzeug.utils import secure_filename
 
 import cards
+
+size = 250, 150
+def createThumbnailAndSave(img, new_filename):
+    try:
+        im = Image.open(img)
+        im.thumbnail(size)
+        if (new_filename != None):
+            im.save(new_filename, "JPEG")
+        return im
+    except IOError:
+        print "cannot create thumbnail"
 
 class NetworkAPI(Thread):
 
@@ -68,13 +80,16 @@ class NetworkAPI(Thread):
         if 'file' not in request.files:
             abort(400)
         file = request.files['file']
+        print(file)
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
             abort(400)
         if file and self.allowed_file(file.filename):
             new_filename = request.form.get('new_file_name')
-            file.save(os.path.join(self.app.config['UPLOAD_FOLDER'], new_filename))
+            # load via ImageAPI resize to thumbnail and save
+            final_path = os.path.normpath(os.path.join(self.app.config['UPLOAD_FOLDER'], new_filename))
+            createThumbnailAndSave(file.stream, final_path)
             cards.update_card_image(card_id, file.filename, new_filename)
             return 'Success'  
         
@@ -140,6 +155,11 @@ class NetworkAPI(Thread):
     def delete_card(self, card_id):
         """Delete a card by ID"""
 
+        # delete filename
+        card_image_name = cards.get_card_file(card_id)
+        final_name = os.path.join(self.app.config['UPLOAD_FOLDER'], card_image_name)
+        os.remove(final_name)
+        
         # TODO: handle errors
         cards.delete_card(card_id)
         return 'Success'

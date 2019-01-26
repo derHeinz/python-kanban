@@ -62,6 +62,13 @@ class Card(db.Model): # pylint: disable=too-few-public-methods
 def all_cards():
     """Return JSON for all cards, sorted by the order_by attribute"""
     return [card.json() for card in Card.query.order_by(Card.sort_order.asc()).all()]
+    
+def _get_card(card_id):
+    return Card.query.get(card_id)
+    
+def get_card_file(card_id):
+    card = _get_card(card_id)
+    return str(card.image_fs_name)
 
 def create_card(text, **kwargs):
     """Create a new card"""
@@ -77,13 +84,10 @@ def delete_card(card_id):
 
 def order_cards(data):
     """Reposition a specified card"""
-
     # TODO: handle missing 'card' property
     card_id = data['card']
     before_id = data.get('before', 'all')
-
     cards = Card.query.order_by(Card.sort_order.asc()).all()
-
     card = next(card for card in cards if card.id == card_id)
 
     if before_id is None:
@@ -105,10 +109,8 @@ def order_cards(data):
     
 def update_card_image(card_id, image_name, image_fs_name):
     card = Card.query.get(card_id)
-    
     card.image_name = image_name
     card.image_fs_name = image_fs_name
-    
     db.session.commit()
 
 def update_card(card_id, json, columns):
