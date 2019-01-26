@@ -15,11 +15,10 @@ The application can be run with the following steps:
  can be used to set up a virtual environment if you want to avoid changing the
  system packages.
 
- 2. Run the application using `flask`:
+ 2. Run the application with python main.py
 
-        FLASK_APP=main.py flask run
 
- 3. Finally connect to [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in a
+ 3. Finally connect to [http://127.0.0.1:5001/](http://127.0.0.1:5001/) in a
     web browser.
 
 License
