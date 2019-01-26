@@ -6,3 +6,4 @@ Jinja2==2.10
 MarkupSafe==1.0
 SQLAlchemy==1.1.15
 Werkzeug==0.13
+pillow==4.0.0
