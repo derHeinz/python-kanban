@@ -205,15 +205,25 @@
               <tr>
                 <td>
                   <div>
-                    <label class="due-label">Due:  <input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
-                      <div>
-                        <label>File<input type="file" id="file" ref="file" v-on:change="handleFileUpload()"/></label>
-                      </div>
+                    <label class="due-label">Due: <input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
+                  </div>
+                  <br>
+                  <div>
+                    <label for="file">File:</label>
+                    <br>
+                    <label for="file">Click to choose images to upload</label>
+                    <input type="file" id="file" @change="on_file_change" accept="image/png, image/jpeg, image/gif" style="opacity: 0;"/>
+                    <div id="preview">
+                        <label v-if="file_display_name() !== null">{{file_display_name()}}</label>
+                        <img v-if="file_url" :src="file_url" style="width:250px;height:150px;" />
+                    </div>
                   </div>
                  </td>
                  <td>
+                    <label for="tag-box">Tags:</label>
                    <div id="tags">
-                     <div class="tag-checkbox-container" v-for="tagid in window.app.tagids" v-bind:style="{'color': tag_color(tagid)}" >
+                     
+                     <div id="tag-box" class="tag-checkbox-container" v-for="tagid in window.app.tagids" v-bind:style="{'color': tag_color(tagid)}" >
                        <label>&#8718;
                          <input title="Color tag" type="checkbox" ref="card_edit_tag" v-bind:id="'card_edit_tag' + tagid" v-bind:checked="tag_checked(tagid, edit_card)" v-bind:style="{'background-color': tag_color(tagid)}" />
                        </label>

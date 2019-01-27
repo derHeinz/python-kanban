@@ -19,12 +19,38 @@ window.app = new Vue({
     show_archived_cards: false,
     show_card_ids: false,
     show_card_timestamps: false,
-    file: null
+    file: null,
+    file_url: null
   },
   el: "#kanban",
   methods: {
-    cancel_card_edit: function () {
+    on_file_change: function(e) {
+        this.file = e.target.files[0];
+        console.log(this.file);
+        this.file_url = URL.createObjectURL(this.file);
+    },
+    file_display_name: function(e) {
+        if (this.edit_card !== null) {
+            // case overwrite a file by adding using on_file_change
+            if (this.file !== null) {
+                return this.file.name;
+            }
+            // case we use the old file
+            if (this.edit_card.image_name !== null) {
+                return this.edit_card.image_name;
+            }
+            // case we show notting
+            return null;
+            
+        }
+    },
+    reset_card_edit: function() {
       this.edit_card = null;
+      this.file = null;
+      this.file_url = null;
+    },
+    cancel_card_edit: function () {
+      reset_card_edit();
     },
     complete_card_edit: function (card_id) {
       if (this.edit_card) {
@@ -65,7 +91,7 @@ window.app = new Vue({
         axios.delete("card/" + card_id).then(function () {
           for (let i = 0; i < vue_app.cards.length; i += 1) {
             if (vue_app.cards[i].id === card_id) {
-              vue_app.edit_card = null;
+              vue_app.reset_card_edit();
               delete vue_app.cards[i];
               vue_app.cards.splice(i, 1);
 
@@ -89,7 +115,8 @@ window.app = new Vue({
     },
     handle_card_edit_click: function (ev) {
       if (ev.target === this.$refs.card_edit_container) {
-        this.edit_card = null;
+        //this.edit_card = null;
+        this.reset_card_edit();
       }
     },
     refresh_cards: function () {
@@ -112,6 +139,9 @@ window.app = new Vue({
     },
     start_card_edit: function (card_id) {
       this.edit_card = this.get_card(card_id);
+      if (this.edit_card.image_fs_name !== null) {
+        this.file_url = 'images/' + this.edit_card.image_fs_name
+      }
 
       let vue_app = this;
 
@@ -130,8 +160,28 @@ window.app = new Vue({
           let uuid = guid();
           let new_file_name = uuid + '.' + file_ext;
         
-          submitFile(id, window.app.file, new_file_name);
+          /* https://serversideup.net/uploading-files-vuejs-axios/ */
+          let file = window.app.file;
+          let formData = new FormData();
+          formData.append('file', file);
+          formData.append('new_file_name', new_file_name);
+          axios.post('/upload-file/' + id, formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+          ).then(function(response){
+            let c = window.app.get_card(id);       
+            c.image_fs_name = new_file_name;
+          }).catch(function(exc){
+            console.log('FAILURE!!');
+            console.log(exc);
+          });
+          
+          
           window.app.file = null;
+          window.app.file_url = null;
             
           /* update current field*/
           this.edit_card.image_name = filename;
@@ -299,32 +349,6 @@ function guid() {
       .substring(1);
   }
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-}
-
-/* https://serversideup.net/uploading-files-vuejs-axios/ */
-function handleFileUpload() {
-    console.log("added file");
-    window.app.file = window.app.$refs.file.files[0];
-    console.log(window.app.file);
-}
-
-function submitFile(cardid, file, new_file_name) {
-    let formData = new FormData();
-    formData.append('file', file);
-    formData.append('new_file_name', new_file_name);
-    axios.post('/upload-file/' + cardid, formData,
-        {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        }
-    ).then(function(response){
-        let c = window.app.get_card(cardid);       
-        c.image_fs_name = new_file_name;
-    }).catch(function(exc){
-        console.log('FAILURE!!');
-        console.log(exc);
-    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {

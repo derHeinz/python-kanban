@@ -1,13 +1,12 @@
-# always uses big size images.
 # static size of image regardless of height and width ratio
-
-# already stored image not shown on edit card.
+# image size does not fit all images (reshapes images -> should hold one side).
 
 # card is not a vue component
 
 # masks duplicated in python and js
 
-# image size is duplicated in python and js
+# image size is duplicated in python and HTML (there it is duplicated again).
 
 # image directory is duplicated in python and js
 
+# file image changes -> old image not removed!
