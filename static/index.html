@@ -201,45 +201,41 @@
       <div ref="card_edit_container" v-on:keyup.Esc.prevent="cancel_card_edit" id="kanban-card-edit" v-if="edit_card !== null" v-on:click="handle_card_edit_click">
         <div id="card_edit">
           <form v-on:submit.prevent="complete_card_edit(edit_card.id, $event)" action="#" method="PUT">
-            <table>
-              <tr>
-                <td>
-                  <div>
-                    <label class="due-label">Due: <input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
-                  </div>
-                  <br>
-                  <div>
-                    <label for="file">File:</label>
-                    <br>
-                    <label for="file">Click to choose images to upload</label>
-                    <input type="file" id="file" @change="on_file_change" accept="image/png, image/jpeg, image/gif" style="opacity: 0;"/>
-                    <div id="preview">
-                        <label v-if="file_display_name() !== null">{{file_display_name()}}</label>
-                        <img v-if="file_url" :src="file_url" style="width:250px;height:150px;" />
-                    </div>
-                  </div>
-                 </td>
-                 <td>
-                    <label for="tag-box">Tags:</label>
-                   <div id="tags">
-                     
-                     <div id="tag-box" class="tag-checkbox-container" v-for="tagid in window.app.tagids" v-bind:style="{'color': tag_color(tagid)}" >
-                       <label>&#8718;
-                         <input title="Color tag" type="checkbox" ref="card_edit_tag" v-bind:id="'card_edit_tag' + tagid" v-bind:checked="tag_checked(tagid, edit_card)" v-bind:style="{'background-color': tag_color(tagid)}" />
-                       </label>
-                     </div>
-                   </div>
-                 </td>
-               </tr>
-            </table>
-            
+
+          <section class="due-section">
+            <label class="due-label">Due: <input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
+          </section>
+          <section class="archived-section">
+             <label class="archived-label">Archived?: <input title="Archive card" ref="card_edit_archive" type="checkbox" v-bind:checked="edit_card.archived"/></label>
+           </section>
+                  
+          <section class="file-section">
+            <label for="file">File:</label>
+            <label for="file" class="image-choose pressbutton">choose</label>
+            <label class="image-remove pressbutton">remove</label>
+            <input type="file" id="file" @change="on_file_change" accept="image/png, image/jpeg, image/gif" style="opacity: 0;"/>
+            <div id="preview">
+                <label v-if="file_display_name() !== null">{{file_display_name()}}</label>
+                <img v-if="file_url" :src="file_url" style="width:250px;height:150px;" />
+            </div>
+          </section>
+   
+          <section class="tags-section">
+            <label for="tag-box">Tags:</label>
+                <div id="tag-box" class="tag-checkbox-container" v-for="tagid in window.app.tagids" v-bind:style="{'color': tag_color(tagid)}" >
+                    <label class="tag">&#8718;
+                        <input title="Color tag" type="checkbox" ref="card_edit_tag" v-bind:id="'card_edit_tag' + tagid" v-bind:checked="tag_checked(tagid, edit_card)" v-bind:style="{'background-color': tag_color(tagid)}" />
+                    </label>
+                </div>
+           </section>
+                      
+           <section class="textarea-section">
+             <textarea v-on:keyup.ctrl.Enter="complete_card_edit(edit_card.id, $event)" ref="card_edit_text">{{edit_card.text}}</textarea>
+           </section>
            
-			<label class="archived-label">Archived?: <input title="Archive card" ref="card_edit_archive" type="checkbox" v-bind:checked="edit_card.archived"/></label>
-            <br />
-            <textarea v-on:keyup.ctrl.Enter="complete_card_edit(edit_card.id, $event)" ref="card_edit_text">{{edit_card.text}}</textarea>
-            <input class="save-card" type="submit" value="save" />
+            <input class="save-card pressbutton" type="submit" value="save" />
           </form>
-          <button class="delete-card" v-on:click.once="delete_card(edit_card.id, $event)">delete card</button>
+          <button class="delete-card pressbutton" v-on:click.once="delete_card(edit_card.id, $event)">delete card</button>
         </div>
       </div>
     </div>
