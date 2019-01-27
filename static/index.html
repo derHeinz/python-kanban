@@ -212,8 +212,8 @@
           <section class="file-section">
             <label for="file">File:</label>
             <label for="file" class="image-choose pressbutton">choose</label>
-            <label class="image-remove pressbutton">remove</label>
             <input type="file" id="file" @change="on_file_change" accept="image/png, image/jpeg, image/gif" style="opacity: 0;"/>
+            <label class="image-remove pressbutton" v-on:click.stop="file_remove" >remove</label> <!--@click="file_remove">remove</label> --->
             <div id="preview">
                 <label v-if="file_display_name() !== null">{{file_display_name()}}</label>
                 <img v-if="file_url" :src="file_url" style="width:250px;height:150px;" />

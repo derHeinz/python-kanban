@@ -68,7 +68,7 @@ def _get_card(card_id):
     
 def get_card_file(card_id):
     card = _get_card(card_id)
-    return str(card.image_fs_name)
+    return card.image_fs_name
 
 def create_card(text, **kwargs):
     """Create a new card"""

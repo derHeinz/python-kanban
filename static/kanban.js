@@ -24,10 +24,20 @@ window.app = new Vue({
   },
   el: "#kanban",
   methods: {
+    reset_card_edit: function() {
+      this.edit_card = null;
+      this.file = null;
+      this.file_url = null;
+    },
     on_file_change: function(e) {
         this.file = e.target.files[0];
         console.log(this.file);
         this.file_url = URL.createObjectURL(this.file);
+    },
+    file_remove: function(e) {
+        console.log("file_remove");
+        this.file = null;
+        this.file_url = null;
     },
     file_display_name: function(e) {
         if (this.edit_card !== null) {
@@ -44,15 +54,12 @@ window.app = new Vue({
             
         }
     },
-    reset_card_edit: function() {
-      this.edit_card = null;
-      this.file = null;
-      this.file_url = null;
-    },
     cancel_card_edit: function () {
+      console.log("cancel_card_edit");
       reset_card_edit();
     },
     complete_card_edit: function (card_id) {
+      console.log("complete_card_edit");
       if (this.edit_card) {
         this.update_card(card_id);
         
@@ -114,6 +121,7 @@ window.app = new Vue({
       }
     },
     handle_card_edit_click: function (ev) {
+      console.log("handle_card_edit_click");
       if (ev.target === this.$refs.card_edit_container) {
         //this.edit_card = null;
         this.reset_card_edit();

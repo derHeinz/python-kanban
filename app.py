@@ -80,7 +80,6 @@ class NetworkAPI(Thread):
         if 'file' not in request.files:
             abort(400)
         file = request.files['file']
-        print(file)
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
@@ -90,6 +89,7 @@ class NetworkAPI(Thread):
             # load via ImageAPI resize to thumbnail and save
             final_path = os.path.normpath(os.path.join(self.app.config['UPLOAD_FOLDER'], new_filename))
             createThumbnailAndSave(file.stream, final_path)
+            self.delete_card_image(card_id)
             cards.update_card_image(card_id, file.filename, new_filename)
             return 'Success'  
         
@@ -156,10 +156,14 @@ class NetworkAPI(Thread):
         """Delete a card by ID"""
 
         # delete filename
-        card_image_name = cards.get_card_file(card_id)
-        final_name = os.path.join(self.app.config['UPLOAD_FOLDER'], card_image_name)
-        os.remove(final_name)
+        self.delete_card_image(card_id)
         
         # TODO: handle errors
         cards.delete_card(card_id)
         return 'Success'
+        
+    def delete_card_image(self, card_id):
+        card_image_name = cards.get_card_file(card_id)
+        if card_image_name is not None:
+            final_name = os.path.join(self.app.config['UPLOAD_FOLDER'], card_image_name)
+            os.remove(final_name)
