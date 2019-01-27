@@ -19,11 +19,35 @@ window.app = new Vue({
     show_archived_cards: false,
     show_card_ids: false,
     show_card_timestamps: false,
+    show_only_near_due: false,
     file: null,
     file_url: null
   },
   el: "#kanban",
   methods: {
+    show_card_or_not: function(card, column) {
+        // filter cards on other columns
+        if (card.column !== column) {
+            return false;
+        }
+        // filter archived cards or not
+        if (card.archived === true && !this.show_archived_cards) {
+            return false;
+        }
+        // filter cards per due date
+        if (this.show_only_near_due === true) {
+            // filter ones without due date.
+            if (!check_due_date(card.due_date)) {
+                return false;
+            }
+            // filter ones with due date in far future
+            let due = new Date(card.due_date);
+            if (date_due(due, 3)) {
+                return false;
+            }
+        }
+        return true;
+    },
     reset_card_edit: function() {
       this.edit_card = null;
       this.file = null;
