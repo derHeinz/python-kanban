@@ -10,19 +10,11 @@ from flask.json import jsonify
 from PIL import Image
 from werkzeug.serving import make_server
 from werkzeug.utils import secure_filename
+from io import BytesIO
+
 
 import cards
 
-size = 250, 150
-def createThumbnailAndSave(img, new_filename):
-    try:
-        im = Image.open(img)
-        im.thumbnail(size)
-        if (new_filename != None):
-            im.save(new_filename, "JPEG")
-        return im
-    except IOError:
-        print "cannot create thumbnail"
 
 class NetworkAPI(Thread):
 
@@ -77,21 +69,21 @@ class NetworkAPI(Thread):
 
     # http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
     def upload_file(self, card_id):
-        if 'file' not in request.files:
+    
+        file_data = request.form.get('file_data')
+        new_file_name = request.form.get('new_file_name')
+        file_name = request.form.get('file_name')
+        if (file_data is None or new_file_name is None or file_name is None):
             abort(400)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            abort(400)
-        if file and self.allowed_file(file.filename):
-            new_filename = request.form.get('new_file_name')
-            # load via ImageAPI resize to thumbnail and save
-            final_path = os.path.normpath(os.path.join(self.app.config['UPLOAD_FOLDER'], new_filename))
-            createThumbnailAndSave(file.stream, final_path)
-            self.delete_card_image(card_id)
-            cards.update_card_image(card_id, file.filename, new_filename)
-            return 'Success'  
+        
+        encoded_file_data = file_data.split(',')[1] #cut "data:image/jpeg;base64,"
+        im = Image.open(BytesIO(encoded_file_data.decode('base64')))
+        
+        final_path = os.path.normpath(os.path.join(self.app.config['UPLOAD_FOLDER'], new_file_name))
+        im.save(final_path, "JPEG")
+        self.delete_card_image(card_id)
+        cards.update_card_image(card_id, file_name, new_file_name)
+        return 'Success'  
         
     def static_file(self, path):
         """Serve files from the static directory"""

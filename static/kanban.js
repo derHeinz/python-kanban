@@ -231,8 +231,10 @@ window.app = new Vue({
           /* https://serversideup.net/uploading-files-vuejs-axios/ */
           let file = window.app.file_url;
           let formData = new FormData();
-          formData.append('file', file);
+          formData.append('file_data', file);
+          formData.append('file_name', filename);
           formData.append('new_file_name', new_file_name);
+          
           axios.post('/upload-file/' + id, formData,
             {
                 headers: {
