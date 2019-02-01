@@ -55,8 +55,44 @@ window.app = new Vue({
     },
     on_file_change: function(e) {
         this.file = e.target.files[0];
-        console.log(this.file);
-        this.file_url = URL.createObjectURL(this.file);
+        this.compress(this.file);     
+    },
+    compress: function(original_file) {
+        const fileName = original_file.name;
+        const reader = new FileReader();
+        reader.readAsDataURL(original_file);
+        reader.onload = event => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const elem = document.createElement('canvas');
+                // scale down image process
+                const max_width = 250;
+                const max_height = 150;
+                // first the real scale factor
+                let width_scale = max_width / img.width;
+                let height_scale = max_height / img.height;
+
+                let scale_factor = null;
+                if (width_scale < height_scale) {
+                    scale_factor = width_scale;
+                } else {
+                    scale_factor = height_scale;
+                }
+                // scale factor computed
+                console.log("computed scale factor for image: " + scale_factor);
+                
+                // scale down image
+                elem.width = img.width * scale_factor;
+                elem.height = img.height * scale_factor;
+
+                const ctx = elem.getContext('2d');
+                // img.width and img.height will give the original dimensions
+                ctx.drawImage(img, 0, 0, elem.width,  elem.height);
+                this.file_url = elem.toDataURL();
+            },
+            reader.onerror = error => console.log(error);
+        };
     },
     file_remove: function(e) {
         console.log("file_remove");
@@ -193,7 +229,7 @@ window.app = new Vue({
           let new_file_name = uuid + '.' + file_ext;
         
           /* https://serversideup.net/uploading-files-vuejs-axios/ */
-          let file = window.app.file;
+          let file = window.app.file_url;
           let formData = new FormData();
           formData.append('file', file);
           formData.append('new_file_name', new_file_name);

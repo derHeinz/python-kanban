@@ -203,20 +203,22 @@
           <form v-on:submit.prevent="complete_card_edit(edit_card.id, $event)" action="#" method="PUT">
 
           <section class="due-section">
-            <label class="due-label">Due: <input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
+            <label class="due-label">Due:<input title="Select due" ref="card_edit_due" type="date" v-bind:value="edit_card.due_date"/></label>
           </section>
           <section class="archived-section">
-             <label class="archived-label">Archived?: <input title="Archive card" ref="card_edit_archive" type="checkbox" v-bind:checked="edit_card.archived"/></label>
-           </section>
+             <label class="archived-label">Archived:<input title="Archive card" ref="card_edit_archive" type="checkbox" v-bind:checked="edit_card.archived"/></label>
+          </section>
                   
           <section class="file-section">
             <label for="file">File:</label>
             <label for="file" class="image-choose pressbutton">choose</label>
+            <label class="image-remove pressbutton" v-on:click.stop="file_remove">remove</label> <!--@click="file_remove">remove</label> --->
             <input type="file" id="file" @change="on_file_change" accept="image/png, image/jpeg, image/gif" style="opacity: 0;"/>
-            <label class="image-remove pressbutton" v-on:click.stop="file_remove" >remove</label> <!--@click="file_remove">remove</label> --->
+            
             <div id="preview">
                 <label v-if="file_display_name() !== null">{{file_display_name()}}</label>
-                <img v-if="file_url" :src="file_url" style="width:250px;height:150px;" />
+                <br>
+                <img v-if="file_url" :src="file_url"/>
             </div>
           </section>
    

@@ -27,6 +27,7 @@
     #kanban-card-edit .archived-section {
         float: right;
         width: 40%;
+        text-align: right;
     }
     
     #kanban-card-edit .pressbutton {
@@ -51,14 +52,16 @@
     }
     #kanban-card-edit .image-choose {
       background-color: blue;
+      font-size: 13px;
     }
     #kanban-card-edit .image-remove {
       background-color: blue;
+      font-size: 13px;
     }
   
     /* Individual elements */
     #kanban-card-edit .tag {
-        float: right;
+      float: right;
 	}   
 
     #kanban-card-edit textarea {
