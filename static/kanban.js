@@ -80,7 +80,7 @@ window.app = new Vue({
                     scale_factor = height_scale;
                 }
                 // scale factor computed
-                console.log("computed scale factor for image: " + scale_factor);
+                // console.log("computed scale factor for image: " + scale_factor);
                 
                 // scale down image
                 elem.width = img.width * scale_factor;
@@ -95,7 +95,7 @@ window.app = new Vue({
         };
     },
     file_remove: function(e) {
-        console.log("file_remove");
+        // console.log("file_remove");
         this.file = null;
         this.file_url = null;
     },
@@ -115,11 +115,11 @@ window.app = new Vue({
         }
     },
     cancel_card_edit: function () {
-      console.log("cancel_card_edit");
+      // console.log("cancel_card_edit");
       reset_card_edit();
     },
     complete_card_edit: function (card_id) {
-      console.log("complete_card_edit");
+      // console.log("complete_card_edit");
       if (this.edit_card) {
         this.update_card(card_id);
         
@@ -181,7 +181,7 @@ window.app = new Vue({
       }
     },
     handle_card_edit_click: function (ev) {
-      console.log("handle_card_edit_click");
+      // console.log("handle_card_edit_click");
       if (ev.target === this.$refs.card_edit_container) {
         //this.edit_card = null;
         this.reset_card_edit();
