@@ -1,11 +1,4 @@
-# static size of image regardless of height and width ratio
-# image size does not fit all images (reshapes images -> should hold one side).
-
-# old image not removeable
-
 # masks duplicated in python and js
-
-# image size is duplicated in python and HTML (there it is duplicated again).
 
 # image directory is duplicated in python and js
 
