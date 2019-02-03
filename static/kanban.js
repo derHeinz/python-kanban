@@ -21,7 +21,9 @@ window.app = new Vue({
     show_card_timestamps: false,
     show_only_near_due: false,
     file: null,
-    file_url: null
+    file_url: null,
+    file_name: null,
+    file_changed: false
   },
   el: "#kanban",
   methods: {
@@ -52,15 +54,16 @@ window.app = new Vue({
       this.edit_card = null;
       this.file = null;
       this.file_url = null;
+      this.file_name = null;
+      this.file_changed = false;
     },
     on_file_change: function(e) {
         this.file = e.target.files[0];
-        this.compress(this.file);     
-    },
-    compress: function(original_file) {
-        const fileName = original_file.name;
+        this.file_changed = true;
+        // read file compressed
+        this.file_name = this.file.name;
         const reader = new FileReader();
-        reader.readAsDataURL(original_file);
+        reader.readAsDataURL(this.file);
         reader.onload = event => {
             const img = new Image();
             img.src = event.target.result;
@@ -92,26 +95,28 @@ window.app = new Vue({
                 this.file_url = elem.toDataURL();
             },
             reader.onerror = error => console.log(error);
-        };
+        };   
     },
     file_remove: function(e) {
         // console.log("file_remove");
+        if (this.file_url !== null) {
+          // console.log("file changed set true");
+          this.file_changed = true;
+        }
         this.file = null;
         this.file_url = null;
+        this.file_name = null;
+        
     },
     file_display_name: function(e) {
         if (this.edit_card !== null) {
-            // case overwrite a file by adding using on_file_change
-            if (this.file !== null) {
-                return this.file.name;
+            
+            if (this.file_name !== null) {
+              return this.file_name;
             }
-            // case we use the old file
-            if (this.edit_card.image_name !== null) {
-                return this.edit_card.image_name;
-            }
+            
             // case we show notting
             return null;
-            
         }
     },
     cancel_card_edit: function () {
@@ -183,7 +188,6 @@ window.app = new Vue({
     handle_card_edit_click: function (ev) {
       // console.log("handle_card_edit_click");
       if (ev.target === this.$refs.card_edit_container) {
-        //this.edit_card = null;
         this.reset_card_edit();
       }
     },
@@ -208,7 +212,9 @@ window.app = new Vue({
     start_card_edit: function (card_id) {
       this.edit_card = this.get_card(card_id);
       if (this.edit_card.image_fs_name !== null) {
-        this.file_url = 'images/' + this.edit_card.image_fs_name
+        this.file_url = 'images/' + this.edit_card.image_fs_name;
+        this.file_name = this.edit_card.image_name;
+        this.file_changed = false;
       }
 
       let vue_app = this;
@@ -220,35 +226,44 @@ window.app = new Vue({
       });
     },
     update_card: function (id) {
-      /* craft uuid name for the file*/
-      let file_updated = (window.app.file !== null);
+
+      let file_updated = (window.app.file_changed);
+      let card = this.get_card(id);
       if (file_updated) {
-          let filename = window.app.file.name;
-          let file_ext = filename.substring(filename.lastIndexOf('.')+1, filename.length) || filename;
-          let uuid = guid();
-          let new_file_name = uuid + '.' + file_ext;
-        
-          /* https://serversideup.net/uploading-files-vuejs-axios/ */
-          let file = window.app.file_url;
-          let formData = new FormData();
-          formData.append('file_data', file);
-          formData.append('file_name', filename);
-          formData.append('new_file_name', new_file_name);
           
-          axios.post('/upload-file/' + id, formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
+          let filename = window.app.file_name;
+          if (filename !== null) {
+              /* craft uuid name for the file*/
+              let file_ext = filename.substring(filename.lastIndexOf('.')+1, filename.length) || filename;
+              let uuid = guid();
+              let new_file_name = uuid + '.' + file_ext;
+            
+              /* https://serversideup.net/uploading-files-vuejs-axios/ */
+              let file = window.app.file_url;
+              let formData = new FormData();
+              formData.append('file_data', file);
+              formData.append('file_name', filename);
+              formData.append('new_file_name', new_file_name);
+              
+              axios.post('/upload-file/' + id, formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
-            }
-          ).then(function(response){
+              ).then(function(response){
+                let c = window.app.get_card(id);       
+                c.image_fs_name = new_file_name;
+              }).catch(function(exc){
+                console.log('FAILURE!!');
+                console.log(exc);
+              });
+          } else {
+            axios.put("remove-file/" + card.id);
+            // immediately remove the image name.
             let c = window.app.get_card(id);       
-            c.image_fs_name = new_file_name;
-          }).catch(function(exc){
-            console.log('FAILURE!!');
-            console.log(exc);
-          });
-          
+            c.image_fs_name = null;
+          }
           
           window.app.file = null;
           window.app.file_url = null;
@@ -257,7 +272,7 @@ window.app = new Vue({
           this.edit_card.image_name = filename;
           // do not update image_fs_name because it's updated asynchronously when upload succeeded.
       }
-      let card = this.get_card(id);
+      
       axios.put("card/" + card.id, card);
     },
     init: function () {

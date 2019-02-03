@@ -50,6 +50,7 @@ class NetworkAPI(Thread):
         self.app.add_url_rule(rule="/card/<int:card_id>", view_func=self.update_card, methods=['PUT'])
         self.app.add_url_rule(rule="/card/<int:card_id>", view_func=self.delete_card, methods=['DELETE'])
         self.app.add_url_rule(rule="/upload-file/<int:card_id>", view_func=self.upload_file, methods=['POST'])
+        self.app.add_url_rule(rule="/remove-file/<int:card_id>", view_func=self.remove_file, methods=['PUT'])
 
         # register default error handler
         self.app.register_error_handler(code_or_exception=404, f=self.not_found)
@@ -83,7 +84,13 @@ class NetworkAPI(Thread):
         im.save(final_path, "JPEG")
         self.delete_card_image(card_id)
         cards.update_card_image(card_id, file_name, new_file_name)
-        return 'Success'  
+        return 'Success'
+        
+    def remove_file(self, card_id):
+        print(card_id)
+        self.delete_card_image(card_id)
+        cards.update_card_image(card_id, None, None)
+        return 'Success'
         
     def static_file(self, path):
         """Serve files from the static directory"""
